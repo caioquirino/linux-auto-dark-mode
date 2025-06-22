@@ -17,6 +17,8 @@ class AppSettingsComponent {
     private val darkTheme = JBTextField()
     private val syncWithOS = JBCheckBox("Sync with OS")
 
+    // FIXME: Use ThemeListProvider stuff
+
     init {
         this.panel = FormBuilder.createFormBuilder()
             .addLabeledComponent(JBLabel("Light theme:"), lightTheme, 1, false)

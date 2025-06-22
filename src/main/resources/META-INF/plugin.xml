@@ -30,5 +30,10 @@
                              displayName="Linux Auto Dark-Mode"/>
 
     <applicationService serviceImplementation="com.github.caioquirino.linuxautodarkmode.settings.AppSettings"/>
+
+    <postStartupActivity implementation="com.github.caioquirino.linuxautodarkmode.ThemeChangeStartupActivity"/>
+
+    <notificationGroup displayType="BALLOON" id="LinuxAutoDarkMode"/>
+
   </extensions>
 </idea-plugin>

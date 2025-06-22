@@ -24,6 +24,8 @@ dependencies {
     // Add necessary plugin dependencies for compilation here, example:
     // bundledPlugin("com.intellij.java")
   }
+  implementation("com.github.hypfvieh:dbus-java-core:5.1.1")
+  implementation("com.github.hypfvieh:dbus-java-transport-native-unixsocket:5.1.1")
 }
 
 intellijPlatform {

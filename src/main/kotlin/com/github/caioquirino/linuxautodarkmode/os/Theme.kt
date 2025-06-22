@@ -1,4 +1,5 @@
 package com.github.caioquirino.linuxautodarkmode.os
 
-class XdgIntegration {
+enum class Theme {
+    ERROR, LIGHT, DARK;
 }
