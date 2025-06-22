@@ -1,0 +1,1 @@
+rootProject.name = "linux-auto-dark-mode"
