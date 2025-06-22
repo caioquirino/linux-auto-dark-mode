@@ -10,6 +10,10 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.ide.ui.LafManager
+import com.intellij.openapi.ui.Messages
+import com.github.caioquirino.linuxautodarkmode.settings.AppSettings
+import javax.swing.UIManager
 
 @Service
 class ThemeListenerService : Disposable {
@@ -33,6 +37,24 @@ class ThemeListenerService : Disposable {
             .getNotificationGroup("LinuxAutoDarkMode")
             .createNotification(message, NotificationType.INFORMATION)
             .notify(null)
+
+        // Change IDE theme
+        val lafManager = LafManager.getInstance()
+        val appSettings = AppSettings.instance.state
+        val targetThemeName = when (theme) {
+            Theme.DARK -> appSettings.darkTheme
+            Theme.LIGHT -> appSettings.lightTheme
+            else -> null
+        }
+        if (targetThemeName != null) {
+            val laf = lafManager.installedLookAndFeels.firstOrNull { it.name == targetThemeName }
+            if (laf != null && lafManager.currentLookAndFeel?.name != laf.name) {
+                ApplicationManager.getApplication().invokeLater {
+                    lafManager.setCurrentLookAndFeel(laf)
+                    lafManager.updateUI()
+                }
+            }
+        }
     }
 
     override fun dispose() {
