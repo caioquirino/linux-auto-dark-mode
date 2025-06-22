@@ -19,11 +19,17 @@ import javax.swing.UIManager
 class ThemeListenerService : Disposable {
     private val connection = DBusConnectionBuilder.forSessionBus().build()
     private val settings = Settings(connection)
+    private var lastTheme: Theme? = null
 
     init {
-        notify(settings.theme)
-        settings.startListening {
-            theme: Theme -> notify(theme)
+        settings.startListening { theme: Theme ->
+            if (theme != lastTheme) {
+                val appSettings = AppSettings.instance.state
+                if (appSettings.syncWithOSOption) {
+                    notify(theme)
+                }
+                lastTheme = theme
+            }
         }
     }
 
