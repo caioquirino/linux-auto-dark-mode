@@ -2,10 +2,9 @@ package com.github.caioquirino.linuxautodarkmode.settings
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.PersistentStateComponent
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
-import org.jetbrains.annotations.NonNls
-
 
 /*
 * Supports storing the application settings in a persistent way.
@@ -13,25 +12,18 @@ import org.jetbrains.annotations.NonNls
 * annotations define the name of the data and the filename where these persistent
 * application settings are stored.
 */
+@Service(Service.Level.APP)
 @State(name = "com.github.caioquirino.linuxautodarkmode.settings.AppSettings", storages = [Storage("LinuxAutoDarkModePlugin.xml")])
-internal class AppSettings
+internal class AppSettings : PersistentStateComponent<AutoDarkModeSettingsModel?> {
 
-    : PersistentStateComponent<AppSettings.State?> {
-    internal class State {
-        @NonNls
-        var lightTheme: String = "Light"
-        var darkTheme: String = "Dark"
-        var syncWithOSOption: Boolean = true
+    var model = AutoDarkModeSettingsModel()
+
+    override fun getState(): AutoDarkModeSettingsModel {
+        return model
     }
 
-    private var appState = State()
-
-    override fun getState(): State {
-        return appState
-    }
-
-    override fun loadState(state: State) {
-        appState = state
+    override fun loadState(state: AutoDarkModeSettingsModel) {
+        model = state
     }
 
     companion object {

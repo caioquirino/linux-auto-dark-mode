@@ -1,9 +1,10 @@
 package com.github.caioquirino.linuxautodarkmode.os.xdg
 
 
-import com.github.caioquirino.linuxautodarkmode.os.Theme
+import com.github.caioquirino.linuxautodarkmode.Theme
 import org.freedesktop.dbus.annotations.DBusInterfaceName
 import org.freedesktop.dbus.connections.impl.DBusConnection
+import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import org.freedesktop.dbus.interfaces.DBusInterface
 import org.freedesktop.dbus.interfaces.DBusSigHandler
 import org.freedesktop.dbus.messages.DBusSignal
@@ -40,8 +41,8 @@ private class SigHandler : DBusSigHandler<SettingsInterface.SettingChanged> {
     }
 }
 
-class Settings(
-    private val connection: DBusConnection,
+class XdgSettings(
+    private val connection: DBusConnection = DBusConnectionBuilder.forSessionBus().build(),
 ) {
     private val settingsInterface: SettingsInterface = connection.getRemoteObject(
         "org.freedesktop.portal.Desktop",
@@ -71,6 +72,13 @@ class Settings(
     fun stopListening() = {
         connection.removeSigHandler(SettingsInterface.SettingChanged::class.java, sigHandler)
         sigHandler.eventHandler = null
+    }
+
+    fun disconnect() = connection.disconnect()
+
+    companion object {
+        val instance: XdgSettings
+            get() = XdgSettings()
     }
 }
 

@@ -1,58 +1,72 @@
 package com.github.caioquirino.linuxautodarkmode.settings
 
-import com.intellij.openapi.options.Configurable
-import org.jetbrains.annotations.Nls
-import java.util.*
-import javax.swing.JComponent
-
+import com.github.caioquirino.linuxautodarkmode.Theme
+import com.github.caioquirino.linuxautodarkmode.intellij.ThemeManager
+import com.github.caioquirino.linuxautodarkmode.os.xdg.XdgSettings
+import com.intellij.openapi.options.BoundConfigurable
+import com.intellij.openapi.ui.DialogPanel
+import com.intellij.ui.dsl.builder.bindItem
+import com.intellij.ui.dsl.builder.bindSelected
+import com.intellij.ui.dsl.builder.panel
 
 /**
  * Provides controller functionality for application settings.
  */
-internal class AppSettingsConfigurable : Configurable {
-    private var settingsComponent: AppSettingsComponent? = null
+internal class AppSettingsConfigurable : BoundConfigurable("Linux Auto Dark-Mode") {
+    private var settings = AppSettings.instance.model
+    private val xdgSettings = XdgSettings.instance
 
-    // A default constructor with no arguments is required because
-    // this implementation is registered as an applicationConfigurable
-    @Nls(capitalization = Nls.Capitalization.Title)
-    override fun getDisplayName(): String {
-        return "SDK: Application Settings Example"
-    }
 
-    override fun getPreferredFocusedComponent(): JComponent {
-        return settingsComponent!!.preferredFocusedComponent
-    }
 
-    override fun createComponent(): JComponent? {
-        settingsComponent = AppSettingsComponent()
-        return settingsComponent!!.panel
-    }
+    override fun createPanel(): DialogPanel {
 
-    override fun isModified(): Boolean {
-        val state: AppSettings.State =
-            Objects.requireNonNull(AppSettings.instance.state)
-        return settingsComponent!!.lightThemeText != state.lightTheme ||
-                settingsComponent!!.darkThemeText != state.darkTheme ||
-                settingsComponent!!.syncWithOSOption != state.syncWithOSOption
+        val lightThemes = ThemeManager.instance.allThemes(Theme.LIGHT)
+        val darkThemes = ThemeManager.instance.allThemes(Theme.DARK)
+
+        val colorSchemeOptions = ThemeManager.instance.allColorSchemes()
+
+        return panel {
+            row("Light theme:") {
+                comboBox(lightThemes)
+                    .bindItem(settings::lightTheme)
+            }
+            row("Light editor color scheme:") {
+                comboBox(colorSchemeOptions)
+                    .bindItem(settings::lightColorScheme)
+            }
+            row("Dark theme:") {
+                comboBox(darkThemes)
+                    .bindItem(settings::darkTheme)
+            }
+            row("Dark editor color scheme:") {
+                comboBox(colorSchemeOptions)
+                    .bindItem(settings::darkColorScheme)
+            }
+            row {
+                checkBox("Sync with OS")
+                    .bindSelected(settings::syncWithOS)
+            }
+            row {
+                checkBox("Show notifications")
+                    .bindSelected(settings::showNotifications)
+            }
+        }
     }
 
     override fun apply() {
-        val state: AppSettings.State =
-            Objects.requireNonNull(AppSettings.instance.state)
-        state.lightTheme = settingsComponent!!.lightThemeText
-        state.darkTheme = settingsComponent!!.darkThemeText
-        state.syncWithOSOption = settingsComponent!!.syncWithOSOption
+        super.apply()
+        when(this.xdgSettings.theme) {
+            Theme.ERROR -> return
+            Theme.LIGHT -> {
+                settings.lightTheme?.let { ThemeManager.instance.setCurrentTheme(it) }
+                settings.lightColorScheme?.let { ThemeManager.instance.setCurrentColorScheme(it) }
+            }
+            Theme.DARK -> {
+                settings.darkTheme?.let { ThemeManager.instance.setCurrentTheme(it) }
+                settings.darkColorScheme?.let { ThemeManager.instance.setCurrentColorScheme(it) }
+            }
+        }
     }
 
-    override fun reset() {
-        val state: AppSettings.State =
-            Objects.requireNonNull(AppSettings.instance.state)
-        settingsComponent!!.lightThemeText = state.lightTheme
-        settingsComponent!!.darkThemeText = state.darkTheme
-        settingsComponent!!.syncWithOSOption = state.syncWithOSOption
-    }
-
-    override fun disposeUIResources() {
-        settingsComponent = null
-    }
+    override fun disposeUIResources() {}
 }
